@@ -1,4 +1,4 @@
-name: Terraform CI Pipeline
+name: Terraform CI and SonarQube Analysis
 
 on:
   push:
@@ -10,12 +10,14 @@ on:
 
 jobs:
   terraform-check:
-    name: Terraform Validation
+    name: Terraform Validation and SonarQube
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -28,3 +30,14 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
+
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarqube-scan-action@v8.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=.
+            -Dsonar.exclusions=.terraform/**,**/*.tfstate*,**/*.pem
