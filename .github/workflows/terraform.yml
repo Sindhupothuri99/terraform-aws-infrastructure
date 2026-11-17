@@ -1,4 +1,4 @@
-name: Terraform CI and SonarQube Analysis
+name: Terraform DevSecOps CI Pipeline
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   terraform-check:
-    name: Terraform Validation and SonarQube
+    name: Terraform Validation and Security
     runs-on: ubuntu-latest
 
     steps:
@@ -31,6 +31,14 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
+      - name: Checkov Security Scan
+        uses: bridgecrewio/checkov-action@v12.1347.0
+        with:
+          directory: .
+          framework: terraform
+          soft_fail: true
+          output_format: cli
+
       - name: SonarQube Cloud Scan
         uses: SonarSource/sonarqube-scan-action@v8.3.0
         env:
@@ -39,5 +47,4 @@ jobs:
           args: >
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.sources=.
             -Dsonar.exclusions=.terraform/**,**/*.tfstate*,**/*.pem
