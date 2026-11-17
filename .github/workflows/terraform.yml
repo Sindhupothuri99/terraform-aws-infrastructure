@@ -39,6 +39,15 @@ jobs:
           soft_fail: true
           output_format: cli
 
+      - name: Trivy Infrastructure Security Scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          format: table
+          exit-code: '0'
+
       - name: SonarQube Cloud Scan
         uses: SonarSource/sonarqube-scan-action@v8.3.0
         env:
